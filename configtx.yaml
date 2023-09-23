@@ -1,0 +1,185 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+    - &Insurer
+        Name: InsurerMSP
+        ID: InsurerMSP
+        MSPDir: crypto-config/peerOrganizations/insurer.example.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('InsurerMSP.admin', 'InsurerMSP.peer', 'InsurerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('InsurerMSP.admin', 'InsurerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('InsurerMSP.admin')"
+
+    - &User
+        Name: UserMSP
+        ID: UserMSP
+        MSPDir: crypto-config/peerOrganizations/user.example.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('UserMSP.admin', 'UserMSP.peer', 'UserMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('UserMSP.admin', 'UserMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('UserMSP.admin')"
+                
+    - &Verifier
+        Name: VerifierMSP
+        ID: VerifierMSP
+        MSPDir: crypto-config/peerOrganizations/verifier.example.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('VerifierMSP.admin', 'VerifierMSP.peer', 'VerifierMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('VerifierMSP.admin', 'VerifierMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('VerifierMSP.admin')"
+                
+    - &Asset
+        Name: AssetMSP
+        ID: AssetMSP
+        MSPDir: crypto-config/peerOrganizations/asset.example.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('AssetMSP.admin', 'AssetMSP.peer', 'AssetMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('AssetMSP.admin', 'AssetMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('AssetMSP.admin')"
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_4_3: true
+        V1_3: false
+        V1_1: false
+    Orderer: &OrdererCapabilities
+        V1_4_2: true
+        V1_1: false
+    Application: &ApplicationCapabilities
+        V1_4_2: true
+        V1_3: false
+        V1_2: false
+        V1_1: false
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer.example.com:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+
+    SupplyOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *Insurer
+                    - *User
+                    - *Verifier
+                    - *Asset
+    SupplyChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Insurer
+                - *User
+                - *Verifier
+                - *Asset
+            Capabilities:
+                <<: *ApplicationCapabilities

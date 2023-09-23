@@ -1,0 +1,171 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+services:
+
+  orderer.example.com:
+    container_name: orderer.example.com
+    extends:
+      file: peer-base.yaml
+      service: orderer-base
+    volumes:
+        - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+        - ../crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+        - ../crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
+        - orderer.example.com:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+
+  peer0.insurer.example.com:
+    container_name: peer0.insurer.example.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.insurer.example.com
+      - CORE_PEER_ADDRESS=peer0.insurer.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.insurer.example.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.user.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.insurer.example.com:7051
+      - CORE_PEER_LOCALMSPID=InsurerMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/insurer.example.com/peers/peer0.insurer.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/insurer.example.com/peers/peer0.insurer.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.insurer.example.com:/var/hyperledger/production
+    ports:
+      - 7051:7051
+
+  peer0.user.example.com:
+    container_name: peer0.user.example.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.user.example.com
+      - CORE_PEER_ADDRESS=peer0.user.example.com:9051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.user.example.com:9052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.user.example.com:9051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.insurer.example.com:9051
+      - CORE_PEER_LOCALMSPID=UserMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/user.example.com/peers/peer0.user.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/user.example.com/peers/peer0.user.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.user.example.com:/var/hyperledger/production
+    ports:
+      - 9051:9051
+      
+  peer0.verifier.example.com:
+    container_name: peer0.verifier.example.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.verifier.example.com
+      - CORE_PEER_ADDRESS=peer0.verifier.example.com:10051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:10051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.verifier.example.com:10052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:10052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.verifier.example.com:10051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.insurer.example.com:10051
+      - CORE_PEER_LOCALMSPID=VerifierMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/verifier.example.com/peers/peer0.verifier.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/verifier.example.com/peers/peer0.verifier.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.verifier.example.com:/var/hyperledger/production
+    ports:
+      - 10051:10051
+      
+      
+  peer0.asset.example.com:
+    container_name: peer0.asset.example.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.asset.example.com
+      - CORE_PEER_ADDRESS=peer0.asset.example.com:11051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.asset.example.com:11052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.asset.example.com:11051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.insurer.example.com:11051
+      - CORE_PEER_LOCALMSPID=AssetMSP
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/asset.example.com/peers/peer0.asset.example.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/asset.example.com/peers/peer0.asset.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.asset.example.com:/var/hyperledger/production
+    ports:
+      - 11051:11051
+      
+  cainsurer:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-insurer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.insurer.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA1_PRIVATE_KEY
+      - FABRIC_CA_SERVER_PORT=7054
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.insurer.example.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA1_PRIVATE_KEY -b admin:adminpw -d'
+    volumes:
+      - ../crypto-config/peerOrganizations/insurer.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      
+  causer:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-user
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.user.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA2_PRIVATE_KEY
+      - FABRIC_CA_SERVER_PORT=8054
+    ports:
+      - "8054:8054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.user.example.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA2_PRIVATE_KEY -b admin:adminpw -d'
+    volumes:
+      - ../crypto-config/peerOrganizations/user.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      
+  caverifier:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-verifier
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.verifier.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA3_PRIVATE_KEY
+      - FABRIC_CA_SERVER_PORT=9054
+    ports:
+      - "9054:9054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.verifier.example.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA3_PRIVATE_KEY -b admin:adminpw -d'
+    volumes:
+      - ../crypto-config/peerOrganizations/verifier.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      
+      
+  caasset:
+    image: hyperledger/fabric-ca:$IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-asset
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.asset.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA4_PRIVATE_KEY
+      - FABRIC_CA_SERVER_PORT=10054
+    ports:
+      - "10054:10054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.asset.example.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA4_PRIVATE_KEY -b admin:adminpw -d'
+    volumes:
+      - ../crypto-config/peerOrganizations/asset.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
