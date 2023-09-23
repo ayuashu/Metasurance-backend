@@ -13,10 +13,10 @@ https://hyperledger-fabric.readthedocs.io/en/release-1.4/prereqs.html
 `cd fabric-samples`
 
 4. Download the template:
-`git clone https://github.com/ialberquilla/hlf1.4-template.git`
+`git clone https://github.com/ayuashu/Metasurance-backend.git`
 
 5. Go to the template
-`cd hlf1.4-template`
+`cd Metasurance-backend`
 
 # Start the network
 1. Generate the crypto material
