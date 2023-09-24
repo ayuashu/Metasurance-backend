@@ -1,7 +1,9 @@
 #!/bin/bash
-
+DOCKER_COMPOSE_FILE="/home/ubuntu/Metasurance-backend/docker-compose-cli.yaml"
 echo "Stopping containers... "
-docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans
+docker-compose -f "$DOCKER_COMPOSE_FILE" down --volumes --remove-orphans
 docker network prune
-#rm -r ./crypto-config
-rm -r ./channel-artifacts
+# Check if the directory exists before attempting to remove it
+if [ -d "./channel-artifacts" ]; then
+    rm -r ./channel-artifacts
+fi

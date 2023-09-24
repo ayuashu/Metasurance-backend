@@ -12,5 +12,8 @@ CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypt
 CORE_PEER_ADDRESS=$PEER.$ORG.example.com:$PORT
 CHANNEL_NAME=mychannel
 CORE_PEER_TLS_ENABLED=true
+
+sleep 10
 peer channel join -b mychannel.block >&log.txt
+
 cat log.txt

@@ -109,8 +109,8 @@ services:
     ports:
       - 11051:11051
       
-  cainsurer:
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+  caInsurer:
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-insurer
@@ -124,8 +124,8 @@ services:
     volumes:
       - ../crypto-config/peerOrganizations/insurer.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
       
-  causer:
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+  caUser:
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-user
@@ -139,8 +139,8 @@ services:
     volumes:
       - ../crypto-config/peerOrganizations/user.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
       
-  caverifier:
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+  caVerifier:
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-verifier
@@ -155,8 +155,8 @@ services:
       - ../crypto-config/peerOrganizations/verifier.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
       
       
-  caasset:
-    image: hyperledger/fabric-ca:$IMAGE_TAG
+  caAsset:
+    image: hyperledger/fabric-ca:${IMAGE_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-asset
